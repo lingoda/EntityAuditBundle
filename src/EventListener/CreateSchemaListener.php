@@ -154,11 +154,24 @@ class CreateSchemaListener implements EventSubscriber
      */
     private function addColumnToTable(Column $column, Table $targetTable): void
     {
+        $columnTypeName = Type::getTypeRegistry()->lookupName($column->getType());
+        $columnArrayOptions = $column->toArray();
+
+        // Change Enum type to String.
+        if($this->config->getDatabasePlatform()){
+            $sqlString = $column->getType()->getSQLDeclaration($columnArrayOptions, $this->config->getDatabasePlatform());
+            if ($this->config->getConvertEnumToString() && false !== strpos($sqlString, 'ENUM')) {
+                $columnTypeName = Types::STRING;
+                $columnArrayOptions['type'] = Type::getType($columnTypeName);
+            }
+        }
+
         $columnName = $column->getName();
 
         $targetTable->addColumn(
             $columnName,
-            Type::getTypeRegistry()->lookupName($column->getType())
+            $columnTypeName,
+            $columnArrayOptions
         );
 
         $targetColumn = $targetTable->getColumn($columnName);
