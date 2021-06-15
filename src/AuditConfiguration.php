@@ -14,7 +14,9 @@ declare(strict_types=1);
 namespace SimpleThings\EntityAudit;
 
 use Doctrine\DBAL\Types\Types;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use SimpleThings\EntityAudit\Exception\ConfigurationNotSetException;
 use SimpleThings\EntityAudit\Metadata\MetadataFactory;
 
 class AuditConfiguration
@@ -49,6 +51,12 @@ class AuditConfiguration
      * @var callable|null
      */
     private $usernameCallable;
+
+    private $convertEnumToString = false;
+    /**
+     * @var null|AbstractPlatform
+     */
+    private $databasePlatform = null;
 
     /**
      * @param string[] $classes
@@ -260,5 +268,35 @@ class AuditConfiguration
     public function getRevisionIdFieldType()
     {
         return $this->revisionIdFieldType;
+    }
+
+    public function setConvertEnumToString(bool $convertEnum): void
+    {
+        $this->convertEnumToString = $convertEnum;
+    }
+
+    public function getConvertEnumToString(): bool
+    {
+        return $this->convertEnumToString;
+    }
+
+    /**
+     * @return null|AbstractPlatform
+     */
+    public function getDatabasePlatform()
+    {
+        if($this->getConvertEnumToString() === true && $this->databasePlatform === null){
+            throw new ConfigurationNotSetException('databasePlatform');
+        }
+
+        return $this->databasePlatform;
+    }
+
+    /**
+     * @param null|AbstractPlatform $databasePlatform
+     */
+    public function setDatabasePlatform($databasePlatform): void
+    {
+        $this->databasePlatform = $databasePlatform;
     }
 }
