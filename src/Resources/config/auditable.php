@@ -127,7 +127,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             ->call('setConvertEnumToString', [param('simplethings.entityaudit.convert_enum_to_string')])
             ->call('setDatabasePlatform', [
                 (new InlineServiceConfigurator(new Definition(Connection::class)))
-                    ->factory([service(Connection::class), 'getDatabasePlatform'])
+                    ->factory([service(Connection::class), 'getDatabasePlatform']),
             ])
             ->call('setTablePrefix', [param('simplethings.entityaudit.table_prefix')])
             ->call('setTableSuffix', [param('simplethings.entityaudit.table_suffix')])
