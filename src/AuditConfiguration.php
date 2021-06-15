@@ -52,7 +52,7 @@ class AuditConfiguration
 
     private $convertEnumToString = false;
     /**
-     * @var null|AbstractPlatform
+     * @var AbstractPlatform|null
      */
     private $databasePlatform = null;
 
@@ -269,11 +269,11 @@ class AuditConfiguration
     }
 
     /**
-     * @return null|AbstractPlatform
+     * @return AbstractPlatform|null
      */
     public function getDatabasePlatform()
     {
-        if($this->getConvertEnumToString() === true && $this->databasePlatform === null){
+        if (true === $this->getConvertEnumToString() && null === $this->databasePlatform) {
             throw new ConfigurationNotSetException('databasePlatform');
         }
 
@@ -281,7 +281,7 @@ class AuditConfiguration
     }
 
     /**
-     * @param null|AbstractPlatform $databasePlatform
+     * @param AbstractPlatform|null $databasePlatform
      */
     public function setDatabasePlatform($databasePlatform): void
     {
