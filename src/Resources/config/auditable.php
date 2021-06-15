@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\ORM\EntityManager;
 use Psr\Clock\ClockInterface;
 use SimpleThings\EntityAudit\AuditConfiguration;
@@ -81,6 +83,11 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             ->public()
             ->call('setAuditedEntityClasses', ['%simplethings.entityaudit.audited_entities%'])
             ->call('setGlobalIgnoreColumns', ['%simplethings.entityaudit.global_ignore_columns%'])
+            ->call('setConvertEnumToString', ['%simplethings.entityaudit.convert_enum_to_string%'])
+            ->call('setDatabasePlatform', [
+                (new InlineServiceConfigurator(new Definition(Connection::class)))
+                    ->factory([new ReferenceConfigurator(Connection::class), 'getDatabasePlatform'])
+            ])
             ->call('setTablePrefix', ['%simplethings.entityaudit.table_prefix%'])
             ->call('setTableSuffix', ['%simplethings.entityaudit.table_suffix%'])
             ->call('setRevisionTableName', ['%simplethings.entityaudit.revision_table_name%'])
