@@ -28,7 +28,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Clock\ClockInterface;
 use SimpleThings\EntityAudit\AuditConfiguration;
 use SimpleThings\EntityAudit\AuditManager;
-use Sonata\EntityAuditBundle\Tests\Fixtures\Core\ProfileAudit;
 
 abstract class BaseTestCase extends TestCase
 {
@@ -154,7 +153,7 @@ abstract class BaseTestCase extends TestCase
         $auditConfig->setDatabasePlatform($this->getEntityManager()->getConnection()->getDatabasePlatform());
         $auditConfig->setGlobalIgnoreColumns(['ignoreme']);
         $auditConfig->setUsernameCallable(static fn (): string => 'beberlei');
-        $auditConfig->setEntityIgnoredProperties([ProfileAudit::class => ['ignoreProperty']]);
+        $auditConfig->setEntityIgnoredProperties(['SimpleThings\EntityAudit\Tests\Fixtures\Core\ProfileAudit' => ['ignoreProperty']]);
 
         $this->auditManager = new AuditManager($auditConfig, $this->getClock());
         $this->auditManager->registerEvents($this->getEntityManager()->getEventManager());
