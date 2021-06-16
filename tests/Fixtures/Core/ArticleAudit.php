@@ -35,7 +35,7 @@ class ArticleAudit
         #[ORM\ManyToOne(targetEntity: UserAudit::class)]
         private ?UserAudit $author,
         #[ORM\Column(type: Types::TEXT)]
-        protected string $ignoreme
+        protected string $ignoreMe
     ) {
     }
 
@@ -54,8 +54,8 @@ class ArticleAudit
         $this->text = $text;
     }
 
-    public function setIgnoreme(string $ignoreme): void
+    public function setIgnoreMe(string $ignoreMe): void
     {
-        $this->ignoreme = $ignoreme;
+        $this->ignoreMe = $ignoreMe;
     }
 }

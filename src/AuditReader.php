@@ -231,6 +231,10 @@ class AuditReader
         $columnMap = [];
 
         foreach ($classMetadata->fieldNames as $columnName => $field) {
+            if ($this->config->isEntityIgnoredProperty($classMetadata->getName(), $classMetadata->getFieldForColumn($columnName))) {
+                continue;
+            }
+
             $tableAlias = $classMetadata->isInheritanceTypeJoined()
                 && $classMetadata->isInheritedField($field)
                 && !$classMetadata->isIdentifier($field)
@@ -410,6 +414,10 @@ class AuditReader
             $columnMap = [];
 
             foreach ($classMetadata->fieldNames as $columnName => $field) {
+                if ($this->config->isEntityIgnoredProperty($classMetadata->getName(), $classMetadata->getFieldForColumn($columnName))) {
+                    continue;
+                }
+
                 $type = Type::getType($classMetadata->fieldMappings[$field]['type']);
                 $tableAlias = $classMetadata->isInheritanceTypeJoined()
                     && $classMetadata->isInheritedField($field)
@@ -734,6 +742,10 @@ class AuditReader
         $columnMap = [];
 
         foreach ($classMetadata->fieldNames as $columnName => $field) {
+            if ($this->config->isEntityIgnoredProperty($classMetadata->getName(), $classMetadata->getFieldForColumn($columnName))) {
+                continue;
+            }
+
             $type = Type::getType($classMetadata->fieldMappings[$field]['type']);
             $columnList[] = $type->convertToPHPValueSQL(
                 $this->quoteStrategy->getColumnName($field, $classMetadata, $this->platform),
