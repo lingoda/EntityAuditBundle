@@ -91,6 +91,20 @@ class CreateSchemaListener implements EventSubscriber
         );
 
         foreach ($entityTable->getColumns() as $column) {
+            // Ignore specific fields for subclasses in-case of using discriminator column.
+            foreach ($cm->subClasses as $subClass) {
+                if ($cm->hasField($column->getName()) || $cm->hasAssociation($column->getName())) {
+                    if ($this->config->isEntityIgnoredProperty($subClass, $cm->getFieldForColumn($column->getName()))) {
+                        continue 2;
+                    }
+                }
+            }
+
+            // Ignore specific fields for table.
+            if (empty($cm->discriminatorColumn) && $this->config->isEntityIgnoredProperty($cm->getName(), $cm->getFieldForColumn($column->getName()))) {
+                continue;
+            }
+
             $this->addColumnToTable($column, $revisionTable);
         }
         $revisionTable->addColumn($this->config->getRevisionFieldName(), $this->config->getRevisionIdFieldType());

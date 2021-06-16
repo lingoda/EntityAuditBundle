@@ -296,6 +296,7 @@ final class CoreTest extends BaseTest
                 'id' => 1,
                 'biography' => 'He is an amazing contributor!',
                 'user_id' => 1,
+                'ignoreProperty' => 'ignore',
             ]
         );
 
@@ -413,7 +414,7 @@ final class CoreTest extends BaseTest
         $revision = $reader->getCurrentRevision(ArticleAudit::class, $articleId);
         static::assertSame('2', (string) $revision);
 
-        $article->setIgnoreme('textnew');
+        $article->setIgnoreMe('textnew');
         $em->persist($article);
         $em->flush();
 
