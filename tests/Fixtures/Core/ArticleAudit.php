@@ -48,7 +48,7 @@ class ArticleAudit
      *
      * @ORM\Column(type="text")
      */
-    protected $ignoreme;
+    private $ignoreMe;
 
     /**
      * @var UserAudit
@@ -57,12 +57,12 @@ class ArticleAudit
      */
     private $author;
 
-    public function __construct(string $title, string $text, UserAudit $author, string $ignoreme)
+    public function __construct(string $title, string $text, UserAudit $author, string $ignoreMe)
     {
         $this->title = $title;
         $this->text = $text;
         $this->author = $author;
-        $this->ignoreme = $ignoreme;
+        $this->ignoreMe = $ignoreMe;
     }
 
     public function getId(): ?int
@@ -80,8 +80,8 @@ class ArticleAudit
         $this->text = $text;
     }
 
-    public function setIgnoreme(string $ignoreme): void
+    public function setIgnoreMe(string $ignoreMe): void
     {
-        $this->ignoreme = $ignoreme;
+        $this->ignoreMe = $ignoreMe;
     }
 }
