@@ -33,6 +33,11 @@ class AuditConfiguration
      */
     private array $globalIgnoreColumns = [];
 
+    /**
+     * @var string[]
+     */
+    private array $entityIgnoredProperties = [];
+
     private string $tablePrefix = '';
 
     private string $tableSuffix = '_audit';
@@ -286,5 +291,26 @@ class AuditConfiguration
     public function setDatabasePlatform($databasePlatform): void
     {
         $this->databasePlatform = $databasePlatform;
+    }
+
+    /**
+     * @return array<string, string[]>
+     */
+    final public function getEntityIgnoredProperties(): array
+    {
+        return $this->entityIgnoredProperties;
+    }
+
+    /**
+     * @param array<string, string[]> $fields
+     */
+    public function setEntityIgnoredProperties(array $fields): void
+    {
+        $this->entityIgnoredProperties = $fields;
+    }
+
+    public function isEntityIgnoredProperty(string $entity, $propertyName): bool
+    {
+        return \array_key_exists($entity, $this->getEntityIgnoredProperties()) && \in_array($propertyName, $this->getEntityIgnoredProperties()[$entity], true);
     }
 }
