@@ -64,8 +64,6 @@ class SimpleDiff
     {
         $ret = '';
         $diff = $this->diff(explode(' ', $old), explode(' ', $new));
-        $nmax = 0;
-        $omax = 0;
         foreach ($diff as $k) {
             if (\is_array($k)) {
                 $ret .= (!empty($k['d']) ? '<del>'.implode(' ', $k['d']).'</del> ' : '').
