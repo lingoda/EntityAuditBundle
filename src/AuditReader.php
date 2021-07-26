@@ -841,8 +841,7 @@ class AuditReader
         $this->entityCache[$className][$key][$revision] = $entity;
 
         foreach ($data as $field => $value) {
-            $isIgnoredProperty = isset($columnMap[$field]) && $this->config->isEntityIgnoredProperty($classMetadata->getName(), $field);
-            if (isset($classMetadata->fieldMappings[$field]) && !$isIgnoredProperty) {
+            if (isset($classMetadata->fieldMappings[$field])) {
                 $type = Type::getType($classMetadata->fieldMappings[$field]['type']);
                 $value = $type->convertToPHPValue($value, $this->platform);
                 $classMetadata->reflFields[$field]->setValue($entity, $value);
