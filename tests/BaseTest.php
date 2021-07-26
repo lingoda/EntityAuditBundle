@@ -27,6 +27,7 @@ use Psr\Clock\ClockInterface;
 use SimpleThings\EntityAudit\AuditConfiguration;
 use SimpleThings\EntityAudit\AuditManager;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use SimpleThings\EntityAudit\Tests\Fixtures\Core\ProfileAudit;
 
 abstract class BaseTest extends TestCase
 {
@@ -171,8 +172,8 @@ abstract class BaseTest extends TestCase
         $auditConfig = AuditConfiguration::forEntities($this->auditedEntities);
         $auditConfig->setConvertEnumToString(true);
         $auditConfig->setDatabasePlatform($this->getEntityManager()->getConnection()->getDatabasePlatform());
-        $auditConfig->setGlobalIgnoreColumns(['ignoreme']);
-        $auditConfig->setEntityIgnoredProperties(['SimpleThings\EntityAudit\Tests\Fixtures\Core\ProfileAudit' => ['ignoreProperty']]);
+        $auditConfig->setGlobalIgnoreColumns(['ignoreMe']);
+        $auditConfig->setEntityIgnoredProperties([ProfileAudit::class => ['ignoreProperty']]);
         $auditConfig->setUsernameCallable(static fn (): string => 'beberlei');
 
         $auditManager = new AuditManager($auditConfig, $this->getClock());
