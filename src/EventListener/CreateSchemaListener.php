@@ -150,7 +150,17 @@ class CreateSchemaListener implements EventSubscriber
     private function addColumnToTable(Column $column, Table $targetTable): void
     {
         $columnTypeName = $column->getType()->getName();
-        $columnArrayOptions = $column->toArray();
+        $columnArrayOptions = array_filter(
+            $column->toArray(),
+            static function ($key) {
+                return !\in_array(
+                    $key,
+                    ['name', 'version', 'secondPrecision', 'enumType', 'jsonb'],
+                    true
+                );
+            },
+            \ARRAY_FILTER_USE_KEY
+        );
 
         // Change Enum type to String.
         if($this->config->getDatabasePlatform()){
