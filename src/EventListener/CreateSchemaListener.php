@@ -82,7 +82,11 @@ class CreateSchemaListener implements EventSubscriber
 
         foreach ($entityTable->getColumns() as $column) {
             $columnTypeName = $column->getType()->getName();
-            $columnArrayOptions = $column->toArray();
+            $columnArrayOptions = array_filter(
+                $column->toArray(),
+                fn($key) => !in_array($key, ['name', 'version', 'secondPrecision', 'enumType', 'jsonb'], true),
+                ARRAY_FILTER_USE_KEY
+            );
 
             // Change Enum type to String.
             if ($this->config->getDatabasePlatform()) {
