@@ -9,7 +9,7 @@
     ],
     "license": "LGPL-2.1",
     "require": {
-        "php": "^7.4 || ^8.0",
+        "php": "^7.3 || ^8.0",
         "doctrine/dbal": "^2.11",
         "doctrine/orm": "^2.7 || ^2.9",
         "symfony/config": "^4.4 || ^5.2",
