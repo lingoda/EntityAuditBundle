@@ -84,11 +84,14 @@ class CreateSchemaListener implements EventSubscriber
             $columnTypeName = $column->getType()->getName();
             $columnArrayOptions = array_filter(
                 $column->toArray(),
-                function ($key) {
-                    return !in_array($key,
-                        ['name', 'version', 'secondPrecision', 'enumType', 'jsonb'], true);
+                static function ($key) {
+                    return !in_array(
+                        $key,
+                        ['name', 'version', 'secondPrecision', 'enumType', 'jsonb'],
+                        true
+                    );
                 },
-                ARRAY_FILTER_USE_KEY
+                \ARRAY_FILTER_USE_KEY
             );
 
             // Change Enum type to String.
