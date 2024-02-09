@@ -85,7 +85,7 @@ class CreateSchemaListener implements EventSubscriber
             $columnArrayOptions = array_filter(
                 $column->toArray(),
                 static function ($key) {
-                    return !in_array(
+                    return !\in_array(
                         $key,
                         ['name', 'version', 'secondPrecision', 'enumType', 'jsonb'],
                         true
