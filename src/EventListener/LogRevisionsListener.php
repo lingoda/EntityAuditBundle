@@ -483,7 +483,12 @@ class LogRevisionsListener implements EventSubscriber
                 continue;
             }
 
-            $params[] = $entityData[$field] ?? null;
+            $param = $entityData[$field] ?? null;
+            if ($param instanceof \BackedEnum) {
+                $param = $param->value;
+            }
+
+            $params[] = $param;
             $types[] = $class->fieldMappings[$field]['type'];
         }
 
