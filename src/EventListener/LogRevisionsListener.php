@@ -196,7 +196,7 @@ class LogRevisionsListener implements EventSubscriber
 
                             $columnName = $columnName['name'];
                         }
-                        $types[] = \PDO::PARAM_INT;
+                        $types[] = $meta->associationMappings[$idField]['type'];
                         $params[] = $meta->reflFields[$idField]->getValue($entity)->getId();
                     }
 
