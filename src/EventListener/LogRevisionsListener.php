@@ -185,6 +185,7 @@ class LogRevisionsListener implements EventSubscriber
                     if (isset($meta->fieldMappings[$idField])) {
                         $columnName = $meta->fieldMappings[$idField]['columnName'];
                         $types[] = $meta->fieldMappings[$idField]['type'];
+                        $params[] = $meta->reflFields[$idField]->getValue($entity);
                     } elseif (isset($meta->associationMappings[$idField])) {
                         $columnName = $meta->associationMappings[$idField]['joinColumns'][0];
                         if (\is_array($columnName)) {
@@ -195,10 +196,9 @@ class LogRevisionsListener implements EventSubscriber
 
                             $columnName = $columnName['name'];
                         }
-                        $types[] = $meta->associationMappings[$idField]['type'];
+                        $types[] = \PDO::PARAM_INT;
+                        $params[] = $meta->reflFields[$idField]->getValue($entity)->getId();
                     }
-
-                    $params[] = $meta->reflFields[$idField]->getValue($entity);
 
                     \assert(isset($columnName));
 
