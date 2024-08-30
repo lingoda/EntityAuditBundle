@@ -124,7 +124,6 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             ->call('setAuditedEntityClasses', [param('simplethings.entityaudit.audited_entities')])
             ->call('setDisabledForeignKeys', [param('simplethings.entityaudit.disable_foreign_keys')])
             ->call('setGlobalIgnoreColumns', [param('simplethings.entityaudit.global_ignore_columns')])
-            ->call('setGlobalIgnoreColumns', [param('simplethings.entityaudit.global_ignore_columns')])
             ->call('setConvertEnumToString', [param('simplethings.entityaudit.convert_enum_to_string')])
             ->call('setDatabasePlatform', [
                 (new InlineServiceConfigurator(new Definition(Connection::class)))

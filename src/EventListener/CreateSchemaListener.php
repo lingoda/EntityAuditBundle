@@ -97,6 +97,20 @@ class CreateSchemaListener implements EventSubscriber
         );
 
         foreach ($entityTable->getColumns() as $column) {
+            foreach ($cm->subClasses as $subClass) {
+                if ($cm->hasField($column->getName()) || $cm->hasAssociation($column->getName())) {
+                    if ($this->config->isEntityIgnoredProperty(
+                        $subClass,
+                        $cm->getFieldForColumn($column->getName())
+                    )) {
+                        continue 2;
+                    }
+                }
+            }
+            if (empty($cm->discriminatorColumn) && $this->config->isEntityIgnoredProperty($cm->getName(), $cm->getFieldForColumn($column->getName()))) {
+                continue;
+            }
+
             $this->addColumnToTable($column, $revisionTable);
         }
         $revisionTable->addColumn($this->config->getRevisionFieldName(), $this->config->getRevisionIdFieldType());
@@ -159,11 +173,31 @@ class CreateSchemaListener implements EventSubscriber
     private function addColumnToTable(Column $column, Table $targetTable): void
     {
         $columnName = $column->getName();
-
-        $targetTable->addColumn(
-            $columnName,
-            Type::getTypeRegistry()->lookupName($column->getType())
+        $columnTypeName = Type::getTypeRegistry()->lookupName($column->getType());
+        $columnArrayOptions = array_filter(
+            $column->toArray(),
+            static function ($key) {
+                return !\in_array(
+                    $key,
+                    ['name', 'version', 'secondPrecision', 'enumType', 'jsonb'],
+                    true
+                );
+            },
+            \ARRAY_FILTER_USE_KEY
         );
+        // Change Enum type to String.
+        if (null !== $this->config->getDatabasePlatform()) {
+            $sqlString = $column->getType()->getSQLDeclaration($columnArrayOptions, $this->config->getDatabasePlatform());
+            if ($this->config->getConvertEnumToString() && str_contains($sqlString, 'ENUM')) {
+                $columnTypeName = Types::STRING;
+                $columnArrayOptions['type'] = Type::getType($columnTypeName);
+            }
+        }
+
+        $targetTable->addColumn($column->getName(), $columnTypeName, array_merge(
+            $columnArrayOptions,
+            ['notnull' => false, 'autoincrement' => false]
+        ));
 
         $targetColumn = $targetTable->getColumn($columnName);
         $targetColumn->setLength($column->getLength());

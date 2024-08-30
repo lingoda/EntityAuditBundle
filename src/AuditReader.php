@@ -233,6 +233,10 @@ class AuditReader
         $columnMap = [];
 
         foreach ($classMetadata->fieldNames as $columnName => $field) {
+            if ($this->config->isEntityIgnoredProperty($classMetadata->getName(), $classMetadata->getFieldForColumn($columnName))) {
+                continue;
+            }
+
             $tableAlias = $classMetadata->isInheritanceTypeJoined()
                 && $classMetadata->isInheritedField($field)
                 && !$classMetadata->isIdentifier($field)
@@ -409,6 +413,10 @@ class AuditReader
             $columnMap = [];
 
             foreach ($classMetadata->fieldNames as $columnName => $field) {
+                if ($this->config->isEntityIgnoredProperty($classMetadata->getName(), $classMetadata->getFieldForColumn($columnName))) {
+                    continue;
+                }
+
                 $type = Type::getType(self::getMappingValue($classMetadata->fieldMappings[$field], 'type'));
                 $tableAlias = $classMetadata->isInheritanceTypeJoined()
                     && $classMetadata->isInheritedField($field)
@@ -730,6 +738,10 @@ class AuditReader
         $columnMap = [];
 
         foreach ($classMetadata->fieldNames as $columnName => $field) {
+            if ($this->config->isEntityIgnoredProperty($classMetadata->getName(), $classMetadata->getFieldForColumn($columnName))) {
+                continue;
+            }
+
             $type = Type::getType(self::getMappingValue($classMetadata->fieldMappings[$field], 'type'));
             /** @phpstan-var literal-string $sqlExpr */
             $sqlExpr = $type->convertToPHPValueSQL(
@@ -868,7 +880,8 @@ class AuditReader
         $this->entityCache[$className][$key][$revision] = $entity;
 
         foreach ($data as $field => $value) {
-            if (isset($classMetadata->fieldMappings[$field])) {
+            $isIgnoredProperty = isset($columnMap[$field]) && $this->config->isEntityIgnoredProperty($classMetadata->getName(), $field);
+            if (isset($classMetadata->fieldMappings[$field]) && !$isIgnoredProperty) {
                 $type = Type::getType(self::getMappingValue($classMetadata->fieldMappings[$field], 'type'));
                 $value = $type->convertToPHPValue($value, $this->platform);
 
