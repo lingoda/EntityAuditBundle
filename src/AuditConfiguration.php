@@ -13,8 +13,10 @@ declare(strict_types=1);
 
 namespace SimpleThings\EntityAudit;
 
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use SimpleThings\EntityAudit\Exception\ConfigurationNotSetException;
 use SimpleThings\EntityAudit\Metadata\MetadataFactory;
 
 class AuditConfiguration
@@ -65,6 +67,11 @@ class AuditConfiguration
      * @var callable|null
      */
     private $usernameCallable;
+    private $convertEnumToString = false;
+    /**
+     * @var AbstractPlatform|null
+     */
+    private $databasePlatform = null;
 
     /**
      * @param string[] $classes
@@ -232,7 +239,7 @@ class AuditConfiguration
     }
 
     /**
-     * @param callable $usernameCallable
+     * @param callable|null $usernameCallable
      */
     public function setUsernameCallable($usernameCallable): void
     {
@@ -266,5 +273,56 @@ class AuditConfiguration
     public function getRevisionIdFieldType()
     {
         return $this->revisionIdFieldType;
+    }
+
+    public function setConvertEnumToString(bool $convertEnum): void
+    {
+        $this->convertEnumToString = $convertEnum;
+    }
+
+    public function getConvertEnumToString(): bool
+    {
+        return $this->convertEnumToString;
+    }
+
+    /**
+     * @return AbstractPlatform|null
+     */
+    public function getDatabasePlatform()
+    {
+        if (true === $this->getConvertEnumToString() && null === $this->databasePlatform) {
+            throw new ConfigurationNotSetException('databasePlatform');
+        }
+
+        return $this->databasePlatform;
+    }
+
+    /**
+     * @param AbstractPlatform|null $databasePlatform
+     */
+    public function setDatabasePlatform($databasePlatform): void
+    {
+        $this->databasePlatform = $databasePlatform;
+    }
+
+    /**
+     * @return array<string, string[]>
+     */
+    final public function getEntityIgnoredProperties($entity): array
+    {
+        return $this->entityIgnoredProperties[$entity] ?? [];
+    }
+
+    /**
+     * @param array<string, string[]> $fields
+     */
+    public function setEntityIgnoredProperties(array $fields): void
+    {
+        $this->entityIgnoredProperties = $fields;
+    }
+
+    public function isEntityIgnoredProperty(string $entity, $propertyName): bool
+    {
+        return \in_array($propertyName, $this->getEntityIgnoredProperties($entity), true);
     }
 }
