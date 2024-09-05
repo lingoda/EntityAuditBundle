@@ -34,6 +34,11 @@ class AuditConfiguration
     private $globalIgnoreColumns = [];
 
     /**
+     * @var string[]
+     */
+    private $entityIgnoredProperties = [];
+
+    /**
      * @var string
      */
     private $tablePrefix = '';
