@@ -75,7 +75,7 @@ class AuditReader
     public function __construct(
         private EntityManagerInterface $em,
         private AuditConfiguration $config,
-        private MetadataFactory $metadataFactory
+        private MetadataFactory $metadataFactory,
     ) {
         $this->platform = $this->em->getConnection()->getDatabasePlatform();
         $this->quoteStrategy = $this->em->getConfiguration()->getQuoteStrategy();
@@ -244,7 +244,7 @@ class AuditReader
                     : 'e';
 
             $type = Type::getType(self::getMappingValue($classMetadata->fieldMappings[$field], 'type'));
-            $columnList[] = sprintf(
+            $columnList[] = \sprintf(
                 '%s AS %s',
                 $type->convertToPHPValueSQL(
                     $tableAlias.'.'.$this->quoteStrategy->getColumnName($field, $classMetadata, $this->platform),
@@ -299,7 +299,7 @@ class AuditReader
                     $queriedDiscrValues[] = $this->em->getConnection()->quote($allDiscrValues[$subclassName]);
                 }
 
-                $whereSQL .= sprintf(
+                $whereSQL .= \sprintf(
                     ' AND %s IN (%s)',
                     self::getMappingNameValue($classMetadata->discriminatorColumn),
                     implode(', ', $queriedDiscrValues)
@@ -307,7 +307,7 @@ class AuditReader
             }
         }
 
-        $query = sprintf(
+        $query = \sprintf(
             'SELECT %s FROM %s e %s WHERE %s ORDER BY e.%s DESC',
             implode(', ', $columnList),
             $tableName,
@@ -555,7 +555,7 @@ class AuditReader
             }
         }
 
-        $query = sprintf(
+        $query = \sprintf(
             'SELECT r.* FROM %s r INNER JOIN %s e ON r.id = e.%s  WHERE %s ORDER BY r.id DESC',
             $this->config->getRevisionTableName(),
             $tableName,
@@ -1054,7 +1054,7 @@ class AuditReader
                         $columnList[] = $targetKeyJoinColumn;
                     }
 
-                    $query = sprintf(
+                    $query = \sprintf(
                         'SELECT %s FROM %s e WHERE %s ORDER BY e.%s DESC',
                         implode(', ', $columnList),
                         $tableName,
@@ -1141,7 +1141,7 @@ class AuditReader
                         foreach ($targetAssoc['relationToSourceKeyColumns'] as $sourceKeyJoinColumn => $sourceKeyColumn) {
                             $columnList[] = $sourceKeyJoinColumn;
                         }
-                        $query = sprintf(
+                        $query = \sprintf(
                             'SELECT %s FROM %s e WHERE %s ORDER BY e.%s DESC',
                             implode(', ', $columnList),
                             $tableName,
