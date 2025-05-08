@@ -19,6 +19,11 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use SimpleThings\EntityAudit\Metadata\MetadataFactory;
 use SimpleThings\EntityAudit\Exception\ConfigurationNotSetException;
 
+/**
+ * NEXT_MAJOR: Declare the class as final.
+ *
+ * @final since 1.19.0
+ */
 class AuditConfiguration
 {
     /**
