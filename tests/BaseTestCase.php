@@ -30,7 +30,7 @@ use SimpleThings\EntityAudit\AuditConfiguration;
 use SimpleThings\EntityAudit\AuditManager;
 use Sonata\EntityAuditBundle\Tests\Fixtures\Core\ProfileAudit;
 
-abstract class BaseTest extends TestCase
+abstract class BaseTestCase extends TestCase
 {
     /**
      * @var Connection|null

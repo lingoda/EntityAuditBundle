@@ -893,8 +893,13 @@ class AuditReader
                 $type = Type::getType(self::getMappingValue($classMetadata->fieldMappings[$field], 'type'));
                 $value = $type->convertToPHPValue($value, $this->platform);
 
-                $reflField = $classMetadata->reflFields[$field];
+                /** @psalm-suppress DeprecatedProperty */
+                $reflField = $classMetadata->propertyAccessors[$field] ?? $classMetadata->reflFields[$field];
                 \assert(null !== $reflField);
+                /**
+                 * @psalm-suppress InternalMethod
+                 * @phpstan-ignore-next-line method.internalInterface
+                 */
                 $reflField->setValue($entity, $value);
             }
         }
@@ -993,8 +998,13 @@ class AuditReader
                     }
                 }
 
-                $reflField = $classMetadata->reflFields[$field];
+                /** @psalm-suppress DeprecatedProperty */
+                $reflField = $classMetadata->propertyAccessors[$field] ?? $classMetadata->reflFields[$field];
                 \assert(null !== $reflField);
+                /**
+                 * @psalm-suppress InternalMethod
+                 * @phpstan-ignore-next-line method.internalInterface
+                 */
                 $reflField->setValue($entity, $value);
             } elseif (
                 0 !== ($assoc['type'] & ClassMetadata::ONE_TO_MANY)
@@ -1006,8 +1016,13 @@ class AuditReader
                         $foreignKeys = [];
                         foreach ($targetClass->associationMappings[$mappedBy]['sourceToTargetKeyColumns'] as $local => $foreign) {
                             $field = $classMetadata->getFieldForColumn($foreign);
-                            $reflField = $classMetadata->reflFields[$field];
+                            /** @psalm-suppress DeprecatedProperty */
+                            $reflField = $classMetadata->propertyAccessors[$field] ?? $classMetadata->reflFields[$field];
                             \assert(null !== $reflField);
+                            /**
+                             * @psalm-suppress InternalMethod
+                             * @phpstan-ignore-next-line method.internalInterface
+                             */
                             $foreignKeys[$local] = $reflField->getValue($entity);
                         }
 
@@ -1033,8 +1048,13 @@ class AuditReader
                     }
                 }
 
-                $reflField = $classMetadata->reflFields[$assoc['fieldName']];
+                /** @psalm-suppress DeprecatedProperty */
+                $reflField = $classMetadata->propertyAccessors[$assoc['fieldName']] ?? $classMetadata->reflFields[$assoc['fieldName']];
                 \assert(null !== $reflField);
+                /**
+                 * @psalm-suppress InternalMethod
+                 * @phpstan-ignore-next-line method.internalInterface
+                 */
                 $reflField->setValue($entity, $collection);
             } elseif (self::isManyToMany($assoc)) {
                 if (self::isManyToManyOwningSideMapping($assoc)) {
@@ -1043,9 +1063,14 @@ class AuditReader
                     foreach (self::getRelationToSourceKeyColumns($assoc) as $sourceKeyJoinColumn => $sourceKeyColumn) {
                         $whereId[] = "{$sourceKeyJoinColumn} = ?";
 
-                        $reflField = $classMetadata->reflFields['id'];
+                        /** @psalm-suppress DeprecatedProperty */
+                        $reflField = $classMetadata->propertyAccessors['id'] ?? $classMetadata->reflFields['id'];
                         \assert(null !== $reflField);
 
+                        /**
+                         * @psalm-suppress InternalMethod
+                         * @phpstan-ignore-next-line method.internalInterface
+                         */
                         $values[] = $reflField->getValue($entity);
                     }
 
@@ -1094,7 +1119,8 @@ class AuditReader
                                 }
                             }
                         } else {
-                            $reflField = $classMetadata->reflFields[$assoc['fieldName']];
+                            /** @psalm-suppress DeprecatedProperty */
+                            $reflField = $classMetadata->propertyAccessors[$assoc['fieldName']] ?? $classMetadata->reflFields[$assoc['fieldName']];
                             \assert(null !== $reflField);
 
                             if ($this->loadNativeCollections) {
@@ -1107,15 +1133,28 @@ class AuditReader
                                 $this->getEntityPersister($targetEntity)
                                     ->loadManyToManyCollection($assoc, $entity, $collection);
 
+                                /**
+                                 * @psalm-suppress InternalMethod
+                                 * @phpstan-ignore-next-line method.internalInterface
+                                 */
                                 $reflField->setValue($entity, $collection);
                             } else {
+                                /**
+                                 * @psalm-suppress InternalMethod
+                                 * @phpstan-ignore-next-line method.internalInterface
+                                 */
                                 $reflField->setValue($entity, new ArrayCollection());
                             }
                         }
                     }
-                    $reflField = $classMetadata->reflFields[$field];
+                    /** @psalm-suppress DeprecatedProperty */
+                    $reflField = $classMetadata->propertyAccessors[$field] ?? $classMetadata->reflFields[$field];
                     \assert(null !== $reflField);
 
+                    /**
+                     * @psalm-suppress InternalMethod
+                     * @phpstan-ignore-next-line method.internalInterface
+                     */
                     $reflField->setValue($entity, $collection);
                 } elseif (isset($targetClass->associationMappings[$mappedBy])) {
                     $targetAssoc = $targetClass->associationMappings[$mappedBy];
@@ -1136,8 +1175,13 @@ class AuditReader
                         )) {
                         foreach ($targetAssoc['relationToTargetKeyColumns'] as $targetKeyJoinColumn => $targetKeyColumn) {
                             $whereId[] = "{$targetKeyJoinColumn} = ?";
-                            $reflField = $classMetadata->reflFields['id'];
+                            /** @psalm-suppress DeprecatedProperty */
+                            $reflField = $classMetadata->propertyAccessors['id'] ?? $classMetadata->reflFields['id'];
                             \assert(null !== $reflField);
+                            /**
+                             * @psalm-suppress InternalMethod
+                             * @phpstan-ignore-next-line method.internalInterface
+                             */
                             $values[] = $reflField->getValue($entity);
                         }
 
@@ -1185,7 +1229,8 @@ class AuditReader
                             }
                         }
                     } else {
-                        $reflField = $classMetadata->reflFields[$assoc['fieldName']];
+                        /** @psalm-suppress DeprecatedProperty */
+                        $reflField = $classMetadata->propertyAccessors[$assoc['fieldName']] ?? $classMetadata->reflFields[$assoc['fieldName']];
                         \assert(null !== $reflField);
 
                         if ($this->loadNativeCollections) {
@@ -1198,19 +1243,37 @@ class AuditReader
                             $this->getEntityPersister($assoc['targetEntity'])
                                 ->loadManyToManyCollection($assoc, $entity, $collection);
 
+                            /**
+                             * @psalm-suppress InternalMethod
+                             * @phpstan-ignore-next-line method.internalInterface
+                             */
                             $reflField->setValue($entity, $collection);
                         } else {
+                            /**
+                             * @psalm-suppress InternalMethod
+                             * @phpstan-ignore-next-line method.internalInterface
+                             */
                             $reflField->setValue($entity, new ArrayCollection());
                         }
                     }
-                    $reflField = $classMetadata->reflFields[$field];
+                    /** @psalm-suppress DeprecatedProperty */
+                    $reflField = $classMetadata->propertyAccessors[$field] ?? $classMetadata->reflFields[$field];
                     \assert(null !== $reflField);
+                    /**
+                     * @psalm-suppress InternalMethod
+                     * @phpstan-ignore-next-line method.internalInterface
+                     */
                     $reflField->setValue($entity, $collection);
                 }
             } else {
                 // Inject collection
-                $reflField = $classMetadata->reflFields[$field];
+                /** @psalm-suppress DeprecatedProperty */
+                $reflField = $classMetadata->propertyAccessors[$field] ?? $classMetadata->reflFields[$field];
                 \assert(null !== $reflField);
+                /**
+                 * @psalm-suppress InternalMethod
+                 * @phpstan-ignore-next-line method.internalInterface
+                 */
                 $reflField->setValue($entity, new ArrayCollection());
             }
         }
