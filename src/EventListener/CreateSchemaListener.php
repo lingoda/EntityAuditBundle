@@ -114,10 +114,10 @@ class CreateSchemaListener implements EventSubscriber
                 $columnName = $column->getObjectName()->toString();
             } else {
                 /** @psalm-suppress InternalMethod */
-                $columnName = $column->getName(); // @phpstan-ignore-line
+                $columnName = $cm->getFieldForColumn($column->getName()); // @phpstan-ignore-line
             }
 
-            if ($cm->discriminatorColumn === null && $this->config->isEntityIgnoredProperty($cm->name, $cm->getFieldForColumn($columnName))) {
+            if ($cm->discriminatorColumn === null && $this->config->isEntityIgnoredProperty($cm->name, $columnName)) {
                 continue;
             }
             $this->addColumnToTable($column, $revisionTable);
