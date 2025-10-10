@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Tools\ToolEvents;
@@ -128,7 +127,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             ->call('setConvertEnumToString', [param('simplethings.entityaudit.convert_enum_to_string')])
             ->call('setDatabasePlatform', [
                 (new InlineServiceConfigurator(new Definition(Connection::class)))
-                    ->factory([new ReferenceConfigurator(Connection::class), 'getDatabasePlatform'])
+                    ->factory([new ReferenceConfigurator(Connection::class), 'getDatabasePlatform']),
             ])
             ->call('setEntityIgnoredProperties', [param('simplethings.entityaudit.entity_ignored_properties')])
             ->call('setTablePrefix', [param('simplethings.entityaudit.table_prefix')])
