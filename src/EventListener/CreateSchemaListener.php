@@ -110,16 +110,24 @@ class CreateSchemaListener implements EventSubscriber
         $revisionTable = $schema->createTable($tableName);
 
         foreach ($entityTable->getColumns() as $column) {
-            if ($this->isDbal4_3()) {
-                $columnName = $column->getObjectName()->toString();
-            } else {
-                /** @psalm-suppress InternalMethod */
-                $columnName = $cm->getFieldForColumn($column->getName()); // @phpstan-ignore-line
+            /** @psalm-suppress InternalMethod */
+            $columnName = $column->getName(); // @phpstan-ignore-line
+
+            foreach ($cm->subClasses as $subClass) {
+                if ($cm->hasField($columnName) || $cm->hasAssociation($columnName)) {
+                    if ($this->config->isEntityIgnoredProperty(
+                        $subClass,
+                        $cm->getFieldForColumn($columnName)
+                    )) {
+                        continue 2;
+                    }
+                }
             }
 
-            if ($cm->discriminatorColumn === null && $this->config->isEntityIgnoredProperty($cm->name, $columnName)) {
+            if (empty($cm->discriminatorColumn) && $this->config->isEntityIgnoredProperty($cm->getName(), $cm->getFieldForColumn($columnName))) {
                 continue;
             }
+
             $this->addColumnToTable($column, $revisionTable);
         }
         $revisionTable->addColumn($this->config->getRevisionFieldName(), $this->config->getRevisionIdFieldType());
