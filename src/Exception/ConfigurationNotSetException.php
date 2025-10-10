@@ -13,12 +13,12 @@ declare(strict_types=1);
 
 namespace SimpleThings\EntityAudit\Exception;
 
-class ConfigurationNotSetException extends \Exception
+final class ConfigurationNotSetException extends \Exception
 {
     public function __construct(string $configName)
     {
         parent::__construct($configName);
 
-        $this->message = sprintf('Config "%s" must be set.', $configName);
+        $this->message = \sprintf('Config "%s" must be set.', $configName);
     }
 }

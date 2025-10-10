@@ -35,7 +35,7 @@ class ProfileAudit
     private ?UserAudit $user = null;
 
     #[ORM\Column(type: Types::STRING)]
-    private $ignoreProperty;
+    private string $ignoreProperty = '';
 
     public function __construct(
         #[ORM\Column(type: Types::TEXT)]
@@ -68,7 +68,7 @@ class ProfileAudit
         $this->user = $user;
     }
 
-    public function setIgnoreProperty($ignoreProperty): void
+    public function setIgnoreProperty(string $ignoreProperty): void
     {
         $this->ignoreProperty = $ignoreProperty;
     }

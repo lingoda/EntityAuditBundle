@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace SimpleThings\EntityAudit;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use SimpleThings\EntityAudit\Metadata\MetadataFactory;
 use SimpleThings\EntityAudit\Exception\ConfigurationNotSetException;
+use SimpleThings\EntityAudit\Metadata\MetadataFactory;
 
 /**
  * NEXT_MAJOR: Declare the class as final.
@@ -67,6 +67,7 @@ class AuditConfiguration
     private $usernameCallable;
 
     private bool $convertEnumToString = false;
+
     /**
      * @var AbstractPlatform|null
      */

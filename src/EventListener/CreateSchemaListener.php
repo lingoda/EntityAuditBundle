@@ -110,6 +110,16 @@ class CreateSchemaListener implements EventSubscriber
         $revisionTable = $schema->createTable($tableName);
 
         foreach ($entityTable->getColumns() as $column) {
+            if ($this->isDbal4_3()) {
+                $columnName = $column->getObjectName()->toString();
+            } else {
+                /** @psalm-suppress InternalMethod */
+                $columnName = $column->getName(); // @phpstan-ignore-line
+            }
+
+            if ($cm->discriminatorColumn === null && $this->config->isEntityIgnoredProperty($cm->name, $cm->getFieldForColumn($columnName))) {
+                continue;
+            }
             $this->addColumnToTable($column, $revisionTable);
         }
         $revisionTable->addColumn($this->config->getRevisionFieldName(), $this->config->getRevisionIdFieldType());
@@ -227,10 +237,32 @@ class CreateSchemaListener implements EventSubscriber
             $columnName = $column->getName(); // @phpstan-ignore-line
         }
 
-        $targetTable->addColumn(
-            $columnName,
-            Type::getTypeRegistry()->lookupName($column->getType())
+        $columnTypeName = Type::getTypeRegistry()->lookupName($column->getType());
+        $columnArrayOptions = array_filter(
+            $column->toArray(),
+            static fn ($key) => !\in_array(
+                $key,
+                ['name', 'version', 'secondPrecision', 'enumType', 'jsonb'],
+                true
+            ),
+            \ARRAY_FILTER_USE_KEY
         );
+
+        if (null !== $this->config->getDatabasePlatform()) {
+            /**
+             * @psalm-suppress PossiblyNullArgument
+             */
+            $sqlString = $column->getType()->getSQLDeclaration($columnArrayOptions, $this->config->getDatabasePlatform());
+            if ($this->config->getConvertEnumToString() && str_contains($sqlString, 'ENUM')) {
+                $columnTypeName = Types::STRING;
+                $columnArrayOptions['type'] = Type::getType($columnTypeName);
+            }
+        }
+
+        $targetTable->addColumn($columnName, $columnTypeName, array_merge(
+            $columnArrayOptions,
+            ['notnull' => false, 'autoincrement' => false]
+        ));
 
         $targetColumn = $targetTable->getColumn($columnName);
         $targetColumn->setLength($column->getLength());
