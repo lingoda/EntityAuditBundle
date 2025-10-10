@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 namespace Sonata\EntityAuditBundle\Tests\Issue;
 
-use Sonata\EntityAuditBundle\Tests\BaseTest;
+use Sonata\EntityAuditBundle\Tests\BaseTestCase;
 use Sonata\EntityAuditBundle\Tests\Fixtures\Issue\Issue318User;
 
-final class Issue318Test extends BaseTest
+final class Issue318Test extends BaseTestCase
 {
     protected $schemaEntities = [
         Issue318User::class,
@@ -38,13 +38,11 @@ final class Issue318Test extends BaseTest
         $userMetadata = $em->getClassMetadata($user::class);
         $classes = [$userMetadata];
         $schema = $this->getSchemaTool()->getSchemaFromMetadata($classes);
-        $schemaName = $schema->getName();
         $config = $this->getAuditManager()->getConfiguration();
         $userNotNullColumnName = 'alias';
         $userIdColumnName = 'id';
-        $revisionsTableUser = $schema->getTable(sprintf(
-            '%s.%sissue318user%s',
-            $schemaName,
+        $revisionsTableUser = $schema->getTable(\sprintf(
+            '%sissue318user%s',
             $config->getTablePrefix(),
             $config->getTableSuffix()
         ));

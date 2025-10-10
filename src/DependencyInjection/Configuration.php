@@ -17,6 +17,11 @@ use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
+/**
+ * NEXT_MAJOR: Declare the class as final.
+ *
+ * @final since 1.19.0
+ */
 class Configuration implements ConfigurationInterface
 {
     private const ALLOWED_REVISION_ID_FIELD_TYPES = [
@@ -64,7 +69,7 @@ class Configuration implements ConfigurationInterface
                     ->beforeNormalization()
                         ->always(static function (?string $value): ?string {
                             if (null !== $value && !\in_array($value, self::ALLOWED_REVISION_ID_FIELD_TYPES, true)) {
-                                @trigger_error(sprintf(
+                                @trigger_error(\sprintf(
                                     'The value "%s" for the "revision_id_field_type" is deprecated'
                                     .' since sonata-project/entity-audit-bundle 1.3 and will throw an error in version 2.0.'
                                     .' You must pass one of the following values: "%s".',

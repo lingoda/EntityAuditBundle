@@ -13,6 +13,11 @@ declare(strict_types=1);
 
 namespace SimpleThings\EntityAudit\Exception;
 
+/**
+ * NEXT_MAJOR: Declare the class as final.
+ *
+ * @final since 1.19.0
+ */
 class DeletedException extends AuditException
 {
     /**
@@ -21,7 +26,7 @@ class DeletedException extends AuditException
      */
     public function __construct(string $className, array $id, $revision)
     {
-        parent::__construct($className, $id, $revision, sprintf(
+        parent::__construct($className, $id, $revision, \sprintf(
             'Class "%s" entity id "%s" has been removed at revision %s',
             $className,
             implode(', ', $id),

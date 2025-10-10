@@ -16,6 +16,9 @@ namespace Sonata\EntityAuditBundle\Tests\Fixtures\Core;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @psalm-suppress ClassMustBeFinal
+ */
 #[ORM\Entity]
 class ProfileAudit
 {
@@ -32,11 +35,11 @@ class ProfileAudit
     private ?UserAudit $user = null;
 
     #[ORM\Column(type: Types::STRING)]
-    private $ignoreProperty;
+    private string $ignoreProperty = '';
 
     public function __construct(
         #[ORM\Column(type: Types::TEXT)]
-        private string $biography
+        private string $biography,
     ) {
     }
 
@@ -65,7 +68,7 @@ class ProfileAudit
         $this->user = $user;
     }
 
-    public function setIgnoreProperty($ignoreProperty): void
+    public function setIgnoreProperty(string $ignoreProperty): void
     {
         $this->ignoreProperty = $ignoreProperty;
     }

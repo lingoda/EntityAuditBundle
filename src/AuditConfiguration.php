@@ -13,12 +13,17 @@ declare(strict_types=1);
 
 namespace SimpleThings\EntityAudit;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use SimpleThings\EntityAudit\Metadata\MetadataFactory;
 use SimpleThings\EntityAudit\Exception\ConfigurationNotSetException;
+use SimpleThings\EntityAudit\Metadata\MetadataFactory;
 
+/**
+ * NEXT_MAJOR: Declare the class as final.
+ *
+ * @final since 1.19.0
+ */
 class AuditConfiguration
 {
     /**
@@ -62,6 +67,7 @@ class AuditConfiguration
     private $usernameCallable;
 
     private bool $convertEnumToString = false;
+
     /**
      * @var AbstractPlatform|null
      */
@@ -275,7 +281,7 @@ class AuditConfiguration
     {
         // php 5.3 compat
         if (null !== $usernameCallable && !\is_callable($usernameCallable)) {
-            throw new \InvalidArgumentException(sprintf('Username Callable must be callable. Got: %s', get_debug_type($usernameCallable)));
+            throw new \InvalidArgumentException(\sprintf('Username Callable must be callable. Got: %s', get_debug_type($usernameCallable)));
         }
 
         $this->usernameCallable = $usernameCallable;

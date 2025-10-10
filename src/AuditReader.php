@@ -34,6 +34,11 @@ use SimpleThings\EntityAudit\Utils\ArrayDiff;
 use SimpleThings\EntityAudit\Utils\ORMCompatibilityTrait;
 use SimpleThings\EntityAudit\Utils\SQLResultCasing;
 
+/**
+ * NEXT_MAJOR: Declare the class as final.
+ *
+ * @final since 1.19.0
+ */
 class AuditReader
 {
     use ORMCompatibilityTrait;
@@ -75,7 +80,7 @@ class AuditReader
     public function __construct(
         private EntityManagerInterface $em,
         private AuditConfiguration $config,
-        private MetadataFactory $metadataFactory
+        private MetadataFactory $metadataFactory,
     ) {
         $this->platform = $this->em->getConnection()->getDatabasePlatform();
         $this->quoteStrategy = $this->em->getConfiguration()->getQuoteStrategy();
@@ -191,10 +196,10 @@ class AuditReader
      * @throws ORMException
      * @throws \RuntimeException
      *
-     * @return object|null
+     * @return object
      *
      * @phpstan-param class-string<T>                   $className
-     * @phpstan-return T|null
+     * @phpstan-return T
      */
     public function find($className, $id, $revision, array $options = [])
     {
@@ -244,7 +249,7 @@ class AuditReader
                     : 'e';
 
             $type = Type::getType(self::getMappingValue($classMetadata->fieldMappings[$field], 'type'));
-            $columnList[] = sprintf(
+            $columnList[] = \sprintf(
                 '%s AS %s',
                 $type->convertToPHPValueSQL(
                     $tableAlias.'.'.$this->quoteStrategy->getColumnName($field, $classMetadata, $this->platform),
@@ -296,10 +301,10 @@ class AuditReader
                 $allDiscrValues = array_flip($classMetadata->discriminatorMap);
                 $queriedDiscrValues = [$this->em->getConnection()->quote($classMetadata->discriminatorValue)];
                 foreach ($classMetadata->subClasses as $subclassName) {
-                    $queriedDiscrValues[] = $this->em->getConnection()->quote($allDiscrValues[$subclassName]);
+                    $queriedDiscrValues[] = $this->em->getConnection()->quote((string) $allDiscrValues[$subclassName]);
                 }
 
-                $whereSQL .= sprintf(
+                $whereSQL .= \sprintf(
                     ' AND %s IN (%s)',
                     self::getMappingNameValue($classMetadata->discriminatorColumn),
                     implode(', ', $queriedDiscrValues)
@@ -307,7 +312,7 @@ class AuditReader
             }
         }
 
-        $query = sprintf(
+        $query = \sprintf(
             'SELECT %s FROM %s e %s WHERE %s ORDER BY e.%s DESC',
             implode(', ', $columnList),
             $tableName,
@@ -555,7 +560,7 @@ class AuditReader
             }
         }
 
-        $query = sprintf(
+        $query = \sprintf(
             'SELECT r.* FROM %s r INNER JOIN %s e ON r.id = e.%s  WHERE %s ORDER BY r.id DESC',
             $this->config->getRevisionTableName(),
             $tableName,
@@ -776,10 +781,13 @@ class AuditReader
         $stmt = $this->em->getConnection()->executeQuery($query, $values);
 
         $result = [];
-        while ($row = $stmt->fetchAssociative()) {
+        $row = $stmt->fetchAssociative();
+        while (false !== $row) {
             $rev = $row[$this->config->getRevisionFieldName()];
             unset($row[$this->config->getRevisionFieldName()]);
             $result[] = $this->createEntity($classMetadata->name, $columnMap, $row, $rev);
+
+            $row = $stmt->fetchAssociative();
         }
 
         return $result;
@@ -885,9 +893,7 @@ class AuditReader
                 $type = Type::getType(self::getMappingValue($classMetadata->fieldMappings[$field], 'type'));
                 $value = $type->convertToPHPValue($value, $this->platform);
 
-                $reflField = $classMetadata->reflFields[$field];
-                \assert(null !== $reflField);
-                $reflField->setValue($entity, $value);
+                $classMetadata->setFieldValue($entity, $field, $value);
             }
         }
 
@@ -985,9 +991,7 @@ class AuditReader
                     }
                 }
 
-                $reflField = $classMetadata->reflFields[$field];
-                \assert(null !== $reflField);
-                $reflField->setValue($entity, $value);
+                $classMetadata->setFieldValue($entity, $field, $value);
             } elseif (
                 0 !== ($assoc['type'] & ClassMetadata::ONE_TO_MANY)
                 && null !== $mappedBy
@@ -998,9 +1002,7 @@ class AuditReader
                         $foreignKeys = [];
                         foreach ($targetClass->associationMappings[$mappedBy]['sourceToTargetKeyColumns'] as $local => $foreign) {
                             $field = $classMetadata->getFieldForColumn($foreign);
-                            $reflField = $classMetadata->reflFields[$field];
-                            \assert(null !== $reflField);
-                            $foreignKeys[$local] = $reflField->getValue($entity);
+                            $foreignKeys[$local] = $classMetadata->getFieldValue($entity, $field);
                         }
 
                         $collection = new AuditedCollection(
@@ -1025,20 +1027,14 @@ class AuditReader
                     }
                 }
 
-                $reflField = $classMetadata->reflFields[$assoc['fieldName']];
-                \assert(null !== $reflField);
-                $reflField->setValue($entity, $collection);
+                $classMetadata->setFieldValue($entity, $assoc['fieldName'], $collection);
             } elseif (self::isManyToMany($assoc)) {
                 if (self::isManyToManyOwningSideMapping($assoc)) {
                     $whereId = [$this->config->getRevisionFieldName().' = ?'];
                     $values = [$revision];
                     foreach (self::getRelationToSourceKeyColumns($assoc) as $sourceKeyJoinColumn => $sourceKeyColumn) {
                         $whereId[] = "{$sourceKeyJoinColumn} = ?";
-
-                        $reflField = $classMetadata->reflFields['id'];
-                        \assert(null !== $reflField);
-
-                        $values[] = $reflField->getValue($entity);
+                        $values[] = $classMetadata->getFieldValue($entity, 'id');
                     }
 
                     $whereSQL = implode(' AND ', $whereId);
@@ -1054,7 +1050,7 @@ class AuditReader
                         $columnList[] = $targetKeyJoinColumn;
                     }
 
-                    $query = sprintf(
+                    $query = \sprintf(
                         'SELECT %s FROM %s e WHERE %s ORDER BY e.%s DESC',
                         implode(', ', $columnList),
                         $tableName,
@@ -1075,15 +1071,17 @@ class AuditReader
                                     $joinKey = $row[$targetKeyJoinColumn];
                                     $id[$targetKeyColumn] = $joinKey;
                                 }
-                                $object = $this->find($targetClass->getName(), $id, $revision);
+                                try {
+                                    $object = $this->find($targetClass->getName(), $id, $revision);
+                                } catch (NoRevisionFoundException) {
+                                    // The entity does not have any revision yet. So let's get the actual state of it.
+                                    $object = $this->em->getRepository($targetClass->getName())->findOneBy($id);
+                                }
                                 if (null !== $object) {
                                     $collection->add($object);
                                 }
                             }
                         } else {
-                            $reflField = $classMetadata->reflFields[$assoc['fieldName']];
-                            \assert(null !== $reflField);
-
                             if ($this->loadNativeCollections) {
                                 $collection = new PersistentCollection(
                                     $this->em,
@@ -1094,16 +1092,14 @@ class AuditReader
                                 $this->getEntityPersister($targetEntity)
                                     ->loadManyToManyCollection($assoc, $entity, $collection);
 
-                                $reflField->setValue($entity, $collection);
+                                $classMetadata->setFieldValue($entity, $assoc['fieldName'], $collection);
                             } else {
-                                $reflField->setValue($entity, new ArrayCollection());
+                                $classMetadata->setFieldValue($entity, $assoc['fieldName'], new ArrayCollection());
                             }
                         }
                     }
-                    $reflField = $classMetadata->reflFields[$field];
-                    \assert(null !== $reflField);
 
-                    $reflField->setValue($entity, $collection);
+                    $classMetadata->setFieldValue($entity, $field, $collection);
                 } elseif (isset($targetClass->associationMappings[$mappedBy])) {
                     $targetAssoc = $targetClass->associationMappings[$mappedBy];
                     $whereId = [$this->config->getRevisionFieldName().' = ?'];
@@ -1123,9 +1119,7 @@ class AuditReader
                         )) {
                         foreach ($targetAssoc['relationToTargetKeyColumns'] as $targetKeyJoinColumn => $targetKeyColumn) {
                             $whereId[] = "{$targetKeyJoinColumn} = ?";
-                            $reflField = $classMetadata->reflFields['id'];
-                            \assert(null !== $reflField);
-                            $values[] = $reflField->getValue($entity);
+                            $values[] = $classMetadata->getFieldValue($entity, 'id');
                         }
 
                         $whereSQL = implode(' AND ', $whereId);
@@ -1141,7 +1135,7 @@ class AuditReader
                         foreach ($targetAssoc['relationToSourceKeyColumns'] as $sourceKeyJoinColumn => $sourceKeyColumn) {
                             $columnList[] = $sourceKeyJoinColumn;
                         }
-                        $query = sprintf(
+                        $query = \sprintf(
                             'SELECT %s FROM %s e WHERE %s ORDER BY e.%s DESC',
                             implode(', ', $columnList),
                             $tableName,
@@ -1160,16 +1154,18 @@ class AuditReader
                                     $id[$sourceKeyColumn] = $joinKey;
                                 }
 
-                                $object = $this->find($targetClass->getName(), $id, $revision);
+                                try {
+                                    $object = $this->find($targetClass->getName(), $id, $revision);
+                                } catch (NoRevisionFoundException) {
+                                    // The entity does not have any revision yet. So let's get the actual state of it.
+                                    $object = $this->em->getRepository($targetClass->getName())->findOneBy($id);
+                                }
                                 if (null !== $object) {
                                     $collection->add($object);
                                 }
                             }
                         }
                     } else {
-                        $reflField = $classMetadata->reflFields[$assoc['fieldName']];
-                        \assert(null !== $reflField);
-
                         if ($this->loadNativeCollections) {
                             $collection = new PersistentCollection(
                                 $this->em,
@@ -1180,20 +1176,17 @@ class AuditReader
                             $this->getEntityPersister($assoc['targetEntity'])
                                 ->loadManyToManyCollection($assoc, $entity, $collection);
 
-                            $reflField->setValue($entity, $collection);
+                            $classMetadata->setFieldValue($entity, $assoc['fieldName'], $collection);
                         } else {
-                            $reflField->setValue($entity, new ArrayCollection());
+                            $classMetadata->setFieldValue($entity, $assoc['fieldName'], new ArrayCollection());
                         }
                     }
-                    $reflField = $classMetadata->reflFields[$field];
-                    \assert(null !== $reflField);
-                    $reflField->setValue($entity, $collection);
+
+                    $classMetadata->setFieldValue($entity, $field, $collection);
                 }
             } else {
                 // Inject collection
-                $reflField = $classMetadata->reflFields[$field];
-                \assert(null !== $reflField);
-                $reflField->setValue($entity, new ArrayCollection());
+                $classMetadata->setFieldValue($entity, $field, new ArrayCollection());
             }
         }
 

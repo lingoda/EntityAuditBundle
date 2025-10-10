@@ -16,6 +16,9 @@ namespace Sonata\EntityAuditBundle\Tests\Fixtures\Core;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @psalm-suppress ClassMustBeFinal
+ */
 #[ORM\Entity]
 class UserAudit
 {
@@ -32,7 +35,7 @@ class UserAudit
 
     public function __construct(
         #[ORM\Column(type: Types::STRING)]
-        private string $name
+        private string $name,
     ) {
     }
 

@@ -15,20 +15,24 @@ namespace SimpleThings\EntityAudit;
 
 /**
  * @phpstan-template T of object
+ *
+ * NEXT_MAJOR: Declare the class as final.
+ *
+ * @final since 1.19.0
  */
 class ChangedEntity
 {
     /**
      * @param array<string, int|string> $id
      *
-     * @phpstan-param class-string<T> $className
      * @phpstan-param T $entity
+     * @phpstan-param class-string<T> $className
      */
     public function __construct(
         private string $className,
         private array $id,
         private string $revType,
-        private object $entity
+        private object $entity,
     ) {
     }
 

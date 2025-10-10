@@ -18,6 +18,8 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * A slightly contrived entity which has an entity (Page) as an ID.
+ *
+ * @psalm-suppress ClassMustBeFinal
  */
 #[ORM\Entity]
 class PageAlias
@@ -28,7 +30,7 @@ class PageAlias
         #[ORM\JoinColumn(name: 'page_id', referencedColumnName: 'id', nullable: false)]
         protected Page $page,
         #[ORM\Column(type: Types::STRING, nullable: false, length: 255, unique: true)]
-        protected ?string $alias = null
+        protected ?string $alias = null,
     ) {
     }
 

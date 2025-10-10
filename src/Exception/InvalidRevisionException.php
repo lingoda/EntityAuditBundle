@@ -13,6 +13,11 @@ declare(strict_types=1);
 
 namespace SimpleThings\EntityAudit\Exception;
 
+/**
+ * NEXT_MAJOR: Declare the class as final.
+ *
+ * @final since 1.19.0
+ */
 class InvalidRevisionException extends AuditException
 {
     /**
@@ -20,6 +25,6 @@ class InvalidRevisionException extends AuditException
      */
     public function __construct($revision)
     {
-        parent::__construct(null, null, $revision, sprintf('No revision "%s" exists.', $revision));
+        parent::__construct(null, null, $revision, \sprintf('No revision "%s" exists.', $revision));
     }
 }

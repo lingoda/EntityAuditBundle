@@ -16,6 +16,9 @@ namespace Sonata\EntityAuditBundle\Tests\Fixtures\Relation;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @psalm-suppress ClassMustBeFinal
+ */
 #[ORM\Entity]
 class PageLocalization
 {
@@ -35,7 +38,7 @@ class PageLocalization
 
     public function __construct(
         #[ORM\Column(type: Types::STRING)]
-        protected string $locale
+        protected string $locale,
     ) {
     }
 

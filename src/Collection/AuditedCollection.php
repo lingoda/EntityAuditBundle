@@ -25,6 +25,10 @@ use SimpleThings\EntityAudit\Exception\AuditedCollectionException;
  * @phpstan-template TKey of array-key
  * @phpstan-template T of object
  * @phpstan-implements Collection<TKey, T>
+ *
+ * NEXT_MAJOR: Declare the class as final.
+ *
+ * @final since 1.19.0
  */
 class AuditedCollection implements Collection
 {
@@ -64,8 +68,8 @@ class AuditedCollection implements Collection
      * @param array<string, mixed>                    $foreignKeys
      * @param string|int                              $revision
      *
-     * @phpstan-param class-string<T> $class
      * @phpstan-param ClassMetadata<T> $metadata
+     * @phpstan-param class-string<T> $class
      */
     public function __construct(
         protected AuditReader $auditReader,
@@ -73,7 +77,7 @@ class AuditedCollection implements Collection
         protected ClassMetadata $metadata,
         protected array|AssociationMapping $associationDefinition,
         protected array $foreignKeys,
-        protected $revision
+        protected $revision,
     ) {
         $this->configuration = $auditReader->getConfiguration();
         $this->entities = new ArrayCollection();
@@ -319,9 +323,10 @@ class AuditedCollection implements Collection
     }
 
     /**
+     * @phpstan-template U
+     *
      * @return Collection<TKey, U>
      *
-     * @phpstan-template U
      * @phpstan-param \Closure(T):U $func
      * @phpstan-return Collection<TKey, U>
      */
@@ -414,7 +419,7 @@ class AuditedCollection implements Collection
         $this->initialize();
 
         if (!$this->entities->offsetExists($offset)) {
-            throw new AuditedCollectionException(sprintf('Offset "%s" is not defined', $offset));
+            throw new AuditedCollectionException(\sprintf('Offset "%s" is not defined', $offset));
         }
 
         $entity = $this->entities->offsetGet($offset);

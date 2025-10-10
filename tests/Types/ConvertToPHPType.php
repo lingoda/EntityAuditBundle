@@ -23,18 +23,28 @@ final class ConvertToPHPType extends TextType
         return 'upper';
     }
 
+    /**
+     * @return true
+     */
     public function canRequireSQLConversion(): bool
     {
         return true;
     }
 
+    /**
+     * @param string           $sqlExpr
+     * @param AbstractPlatform $platform
+     */
     public function convertToPHPValueSQL($sqlExpr, $platform): string
     {
-        return sprintf('UPPER(%s)', $sqlExpr);
+        return \sprintf('UPPER(%s)', $sqlExpr);
     }
 
+    /**
+     * @param string $sqlExpr
+     */
     public function convertToDatabaseValueSQL($sqlExpr, AbstractPlatform $platform): string
     {
-        return sprintf('LOWER(%s)', $sqlExpr);
+        return \sprintf('LOWER(%s)', $sqlExpr);
     }
 }

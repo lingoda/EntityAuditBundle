@@ -17,6 +17,10 @@ namespace SimpleThings\EntityAudit\Utils;
  * Class of the SimpleDiff PHP library by Paul Butler.
  *
  * @see https://github.com/paulgb/simplediff
+ *
+ * NEXT_MAJOR: Declare the class as final.
+ *
+ * @final since 1.19.0
  */
 class SimpleDiff
 {
@@ -66,6 +70,8 @@ class SimpleDiff
     {
         $ret = '';
         $diff = $this->diff(explode(' ', $old), explode(' ', $new));
+        $nmax = 0;
+        $omax = 0;
         foreach ($diff as $k) {
             if (\is_array($k)) {
                 $ret .= ([] !== $k['d'] ? '<del>'.implode(' ', $k['d']).'</del> ' : '')

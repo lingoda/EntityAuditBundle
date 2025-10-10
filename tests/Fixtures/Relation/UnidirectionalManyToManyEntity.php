@@ -18,6 +18,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @psalm-suppress ClassMustBeFinal
+ */
 #[ORM\Entity]
 class UnidirectionalManyToManyEntity
 {
@@ -37,7 +40,7 @@ class UnidirectionalManyToManyEntity
 
     public function __construct(
         #[ORM\Column(type: Types::STRING)]
-        private string $title
+        private string $title,
     ) {
         $this->linkedEntity = new ArrayCollection();
     }

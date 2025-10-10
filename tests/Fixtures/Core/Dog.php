@@ -16,13 +16,16 @@ namespace Sonata\EntityAuditBundle\Tests\Fixtures\Core;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @psalm-suppress ClassMustBeFinal
+ */
 #[ORM\Entity]
 class Dog extends PetAudit
 {
     public function __construct(
         string $name,
         #[ORM\Column(type: Types::INTEGER, name: 'dog_tail_length')]
-        private int $tailLength
+        private int $tailLength,
     ) {
         parent::__construct($name);
     }

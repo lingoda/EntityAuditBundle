@@ -23,6 +23,10 @@ use SimpleThings\EntityAudit\Metadata\MetadataFactory;
 /**
  * Audit Manager grants access to metadata and configuration
  * and has a factory method for audit queries.
+ *
+ * NEXT_MAJOR: Declare the class as final.
+ *
+ * @final since 1.19.0
  */
 class AuditManager
 {
@@ -30,7 +34,7 @@ class AuditManager
 
     public function __construct(
         private AuditConfiguration $config,
-        private ?ClockInterface $clock = null
+        private ?ClockInterface $clock = null,
     ) {
         $this->metadataFactory = $config->createMetadataFactory();
     }

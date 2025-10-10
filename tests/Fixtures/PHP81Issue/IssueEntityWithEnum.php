@@ -16,6 +16,9 @@ namespace Sonata\EntityAuditBundle\Tests\Fixtures\PHP81Issue;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @psalm-suppress ClassMustBeFinal
+ */
 #[ORM\Entity]
 class IssueEntityWithEnum
 {
@@ -26,7 +29,7 @@ class IssueEntityWithEnum
 
     public function __construct(
         #[ORM\Column(enumType: Status::class)]
-        private Status $status
+        private Status $status,
     ) {
     }
 

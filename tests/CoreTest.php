@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Sonata\EntityAuditBundle\Tests;
 
 use Doctrine\DBAL\Exception\DriverException;
-use Doctrine\DBAL\Platforms\SqlitePlatform;
+use Doctrine\DBAL\Platforms\SQLitePlatform;
 use SimpleThings\EntityAudit\ChangedEntity;
 use SimpleThings\EntityAudit\Exception\NoRevisionFoundException;
 use SimpleThings\EntityAudit\Exception\NotAuditedException;
@@ -29,7 +29,7 @@ use Sonata\EntityAuditBundle\Tests\Fixtures\Core\ProfileAudit;
 use Sonata\EntityAuditBundle\Tests\Fixtures\Core\Rabbit;
 use Sonata\EntityAuditBundle\Tests\Fixtures\Core\UserAudit;
 
-final class CoreTest extends BaseTest
+final class CoreTest extends BaseTestCase
 {
     protected $schemaEntities = [
         ArticleAudit::class,
@@ -159,7 +159,7 @@ final class CoreTest extends BaseTest
         $reader = $this->getAuditManager()->createAuditReader($this->getEntityManager());
 
         $this->expectException(NoRevisionFoundException::class);
-        $this->expectExceptionMessage(sprintf(
+        $this->expectExceptionMessage(\sprintf(
             'No revision of class "%s" (1) was found at revision 1 or before. The entity did not exist at the specified revision yet.',
             UserAudit::class
         ));
@@ -195,7 +195,7 @@ final class CoreTest extends BaseTest
         $revisions = $reader->findRevisionHistory();
 
         static::assertCount(2, $revisions);
-        static::assertContainsOnly(Revision::class, $revisions);
+        static::assertContainsOnlyInstancesOf(Revision::class, $revisions);
 
         static::assertSame('2', (string) $revisions[0]->getRev());
         static::assertInstanceOf(\DateTime::class, $revisions[0]->getTimestamp());
@@ -230,7 +230,7 @@ final class CoreTest extends BaseTest
 
         // duplicated entries means a bug with discriminators
         static::assertCount(6, $changedEntities);
-        static::assertContainsOnly(ChangedEntity::class, $changedEntities);
+        static::assertContainsOnlyInstancesOf(ChangedEntity::class, $changedEntities);
 
         static::assertSame(ArticleAudit::class, $changedEntities[0]->getClassName());
         static::assertSame('INS', $changedEntities[0]->getRevisionType());
@@ -338,7 +338,7 @@ final class CoreTest extends BaseTest
         $revisions = $reader->findRevisions(UserAudit::class, $userId);
 
         static::assertCount(2, $revisions);
-        static::assertContainsOnly(Revision::class, $revisions);
+        static::assertContainsOnlyInstancesOf(Revision::class, $revisions);
 
         static::assertSame('2', (string) $revisions[0]->getRev());
         static::assertInstanceOf(\DateTime::class, $revisions[0]->getTimestamp());
@@ -443,7 +443,7 @@ final class CoreTest extends BaseTest
         $changedEntities = $reader->findEntitiesChangedAtRevision(2);
 
         static::assertCount(1, $changedEntities);
-        static::assertContainsOnly(ChangedEntity::class, $changedEntities);
+        static::assertContainsOnlyInstancesOf(ChangedEntity::class, $changedEntities);
         static::assertSame(UserAudit::class, $changedEntities[0]->getClassName());
         static::assertSame('DEL', $changedEntities[0]->getRevisionType());
         static::assertArrayHasKey('id', $changedEntities[0]->getId());
@@ -486,7 +486,7 @@ final class CoreTest extends BaseTest
     {
         $em = $this->getEntityManager();
 
-        $isSqlitePlatform = $em->getConnection()->getDatabasePlatform() instanceof SqlitePlatform;
+        $isSqlitePlatform = $em->getConnection()->getDatabasePlatform() instanceof SQLitePlatform;
         $updateForeignKeysConfig = false;
 
         if ($isSqlitePlatform) {

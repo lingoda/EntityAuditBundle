@@ -16,6 +16,11 @@ namespace SimpleThings\EntityAudit\User;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
+/**
+ * NEXT_MAJOR: Declare the class as final.
+ *
+ * @final since 1.19.0
+ */
 class TokenStorageUsernameCallable
 {
     private TokenStorageInterface $tokenStorage;
@@ -30,7 +35,7 @@ class TokenStorageUsernameCallable
         if ($tokenStorageOrContainer instanceof TokenStorageInterface) {
             $this->tokenStorage = $tokenStorageOrContainer;
         } elseif ($tokenStorageOrContainer instanceof Container) {
-            @trigger_error(sprintf(
+            @trigger_error(\sprintf(
                 'Passing as argument 1 an instance of "%s" to "%s" is deprecated since'
                 .' sonata-project/entity-audit-bundle 1.x and will throw an "%s" in version 2.0.'
                 .' You must pass an instance of "%s" instead.',
@@ -44,7 +49,7 @@ class TokenStorageUsernameCallable
             \assert($tokenStorage instanceof TokenStorageInterface);
             $this->tokenStorage = $tokenStorage;
         } else {
-            throw new \TypeError(sprintf(
+            throw new \TypeError(\sprintf(
                 'Argument 1 passed to "%s()" must be an instance of "%s" or %s, instance of "%s" given.',
                 __METHOD__,
                 TokenStorageInterface::class,

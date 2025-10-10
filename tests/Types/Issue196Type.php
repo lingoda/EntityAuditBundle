@@ -26,13 +26,19 @@ final class Issue196Type extends TextType
         return 'issue196type';
     }
 
+    /**
+     * @return true
+     */
     public function canRequireSQLConversion(): bool
     {
         return true;
     }
 
+    /**
+     * @param string $sqlExpr
+     */
     public function convertToDatabaseValueSQL($sqlExpr, AbstractPlatform $platform): string
     {
-        return sprintf('lower(%s)', $sqlExpr);
+        return \sprintf('lower(%s)', $sqlExpr);
     }
 }
