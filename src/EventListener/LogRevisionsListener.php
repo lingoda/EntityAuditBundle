@@ -202,7 +202,8 @@ class LogRevisionsListener implements EventSubscriber
                     throw new \RuntimeException('column name not found  for'.$idField);
                 }
 
-                $params[] = $meta->getFieldValue($entity, $idField);
+                // The UoW identifier holds the related entity's id for association identifiers.
+                $params[] = $uow->getEntityIdentifier($entity)[$idField];
 
                 $sql .= ' AND '.$columnName.' = ?';
             }
@@ -558,12 +559,14 @@ class LogRevisionsListener implements EventSubscriber
                 if (self::isToOneOwningSide($assoc)) {
                     $data = $entityData[$field] ?? null;
                     $relatedId = [];
+                    $targetClass = $em->getClassMetadata(self::getMappingTargetEntityValue($assoc));
 
                     if (\is_object($data) && $uow->isInIdentityMap($data)) {
                         $relatedId = $uow->getEntityIdentifier($data);
+                    } elseif (\is_scalar($data) && $class->isIdentifier($field)) {
+                        // Merged in from the UoW identifier, which holds the related entity's id.
+                        $relatedId = [$targetClass->getSingleIdentifierFieldName() => $data];
                     }
-
-                    $targetClass = $em->getClassMetadata(self::getMappingTargetEntityValue($assoc));
 
                     foreach (self::getSourceToTargetKeyColumns($assoc) as $sourceColumn => $targetColumn) {
                         $fields[$sourceColumn] = true;
