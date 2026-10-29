@@ -33,6 +33,7 @@ use Sonata\EntityAuditBundle\Tests\Fixtures\Relation\OwnedEntity1;
 use Sonata\EntityAuditBundle\Tests\Fixtures\Relation\OwnedEntity2;
 use Sonata\EntityAuditBundle\Tests\Fixtures\Relation\OwnedEntity3;
 use Sonata\EntityAuditBundle\Tests\Fixtures\Relation\OwnedEntity4;
+use Sonata\EntityAuditBundle\Tests\Fixtures\Relation\OwnerAlias;
 use Sonata\EntityAuditBundle\Tests\Fixtures\Relation\OwnerEntity;
 use Sonata\EntityAuditBundle\Tests\Fixtures\Relation\Page;
 use Sonata\EntityAuditBundle\Tests\Fixtures\Relation\PageAlias;
@@ -61,6 +62,7 @@ final class RelationTest extends BaseTestCase
         CheeseProduct::class,
         Page::class,
         PageAlias::class,
+        OwnerAlias::class,
         PageLocalization::class,
         RelationOneToOneEntity::class,
         RelationFoobarEntity::class,
@@ -85,6 +87,7 @@ final class RelationTest extends BaseTestCase
         CheeseProduct::class,
         Page::class,
         PageAlias::class,
+        OwnerAlias::class,
         PageLocalization::class,
         RelationOneToOneEntity::class,
         RelationFoobarEntity::class,
@@ -1018,6 +1021,34 @@ final class RelationTest extends BaseTestCase
         $pageAlias = new PageAlias($page, 'This is the alias');
         $em->persist($pageAlias);
         $em->flush();
+    }
+
+    public function testExtraUpdateOfEntityIdentifiedByNonStringableEntity(): void
+    {
+        $em = $this->getEntityManager();
+
+        $owner = new OwnerEntity();
+        $owner->setTitle('owner');
+        $em->persist($owner);
+        $em->flush();
+
+        $ownerAlias = new OwnerAlias($owner, 'first');
+        $em->persist($ownerAlias);
+        $em->flush();
+
+        $ownerAlias->setAlias('second');
+        $em->flush();
+
+        $em->remove($ownerAlias);
+        $em->flush();
+
+        $rows = $em->getConnection()->fetchAllAssociative('SELECT owner_id, alias, revtype FROM OwnerAlias_audit ORDER BY rev');
+
+        static::assertSame([
+            ['owner_id' => $owner->getId(), 'alias' => 'first', 'revtype' => 'INS'],
+            ['owner_id' => $owner->getId(), 'alias' => 'second', 'revtype' => 'UPD'],
+            ['owner_id' => $owner->getId(), 'alias' => 'second', 'revtype' => 'DEL'],
+        ], $rows);
     }
 
     public function testOneToOneBidirectional(): void
