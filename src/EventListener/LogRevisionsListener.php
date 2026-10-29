@@ -132,6 +132,10 @@ class LogRevisionsListener implements EventSubscriber
                 /** @phpstan-var literal-string $field */
                 $field = $meta->getFieldName($column);
                 $fieldName = $meta->getFieldForColumn($column);
+                if ($meta->hasField($fieldName) && $this->config->isEntityIgnoredProperty($meta->getName(), $fieldName)) {
+                    continue;
+                }
+
                 $placeholder = '?';
                 if ($meta->hasField($fieldName)) {
                     /** @phpstan-var literal-string $field */
@@ -144,11 +148,7 @@ class LogRevisionsListener implements EventSubscriber
                     }
                 }
 
-                if ($column === array_key_first($updateData[$meta->table['name']])) {
-                    $sql .= ' SET';
-                } else {
-                    $sql .= ',';
-                }
+                $sql .= [] === $params ? ' SET' : ',';
 
                 $sql .= ' '.$field.' = '.$placeholder;
 
@@ -177,6 +177,10 @@ class LogRevisionsListener implements EventSubscriber
 
                     $types[] = $type;
                 }
+            }
+
+            if ([] === $params) {
+                continue;
             }
 
             $sql .= ' WHERE '.$this->config->getRevisionFieldName().' = ?';
@@ -259,6 +263,10 @@ class LogRevisionsListener implements EventSubscriber
             if (isset($changeset[$column])) {
                 unset($changeset[$column]);
             }
+        }
+
+        foreach ($this->config->getEntityIgnoredProperties($class->getName()) as $field) {
+            unset($changeset[$field]);
         }
 
         // if we have no changes left => don't create revision log
@@ -436,6 +444,10 @@ class LogRevisionsListener implements EventSubscriber
                     continue;
                 }
 
+                if ($this->config->isEntityIgnoredProperty($class->getName(), $field)) {
+                    continue;
+                }
+
                 if ($class->isInheritanceTypeJoined()
                     && $class->isInheritedField($field)
                     && !$class->isIdentifier($field)
@@ -588,6 +600,10 @@ class LogRevisionsListener implements EventSubscriber
 
         foreach ($class->fieldNames as $field) {
             if (\array_key_exists($field, $fields)) {
+                continue;
+            }
+
+            if ($this->config->isEntityIgnoredProperty($class->getName(), $field)) {
                 continue;
             }
 

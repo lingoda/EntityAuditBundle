@@ -280,6 +280,34 @@ final class CoreTest extends BaseTestCase
         static::assertSame('beberlei', $articleAuditAuthor->getName());
     }
 
+    public function testIgnoredPropertyIsNotWrittenToTheAuditTable(): void
+    {
+        $profile = new ProfileAudit('He is an amazing contributor!');
+        $profile->setIgnoreProperty('secret');
+
+        $em = $this->getEntityManager();
+        $em->persist($profile);
+        $em->flush();
+
+        $profile->setBiography('He is a great contributor!');
+        $profile->setIgnoreProperty('another secret');
+        $em->flush();
+
+        $profile->setIgnoreProperty('only the ignored property changes');
+        $em->flush();
+
+        $profileId = $profile->getId();
+        static::assertNotNull($profileId);
+
+        $reader = $this->getAuditManager()->createAuditReader($em);
+        $revisions = $reader->findRevisions(ProfileAudit::class, $profileId);
+        static::assertCount(2, $revisions);
+
+        $audited = $reader->find(ProfileAudit::class, $profileId, $revisions[0]->getRev());
+        static::assertNotNull($audited);
+        static::assertSame('He is a great contributor!', $audited->getBiography());
+    }
+
     public function testNotVersionedReverseRelationFind(): void
     {
         $user = new UserAudit('beberlei');
