@@ -264,6 +264,8 @@ class CreateSchemaListener implements EventSubscriber
             if ($this->config->getConvertEnumToString() && str_contains($sqlString, 'ENUM')) {
                 $columnTypeName = Types::STRING;
                 $columnArrayOptions['type'] = Type::getType($columnTypeName);
+                // DBAL 4 has no default VARCHAR length, DBAL 3 used 255
+                $columnArrayOptions['length'] ??= 255;
             }
         }
 
@@ -273,7 +275,7 @@ class CreateSchemaListener implements EventSubscriber
         ));
 
         $targetColumn = $targetTable->getColumn($columnName);
-        $targetColumn->setLength($column->getLength());
+        $targetColumn->setLength($columnArrayOptions['length'] ?? null);
         $targetColumn->setPrecision($column->getPrecision());
         $targetColumn->setScale($column->getScale());
         $targetColumn->setUnsigned($column->getUnsigned());
